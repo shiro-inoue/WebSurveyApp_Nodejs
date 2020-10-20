@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>緊急時アンケート</title>
+    <script src="survey.js"></script>
+    <script src="accessDB.js"></script>
+</head>
+
+<body>
+    <h1>緊急時アンケート</h1>
+    <h2><span id=employeeName></span><br></h2>
+
+    これはソーバル社員に向けた、緊急事態発生時の状況を確認するためのアンケートページです。<br>
+    安全を確保し、落ち着いてご回答お願いいたします。<br>
+    <form id="qId">
+        <h2>Q1. あなたは無事ですか？</h2>
+        <p style="padding-left:1em">
+            <input type="radio" id="ans1_1" name="ans1" value="1" onclick="setSendButtonState()">怪我などは無い<br>
+            <input type="radio" id="ans1_2" name="ans1" value="2" onclick="setSendButtonState()">怪我をしている<br>
+        </p>
+
+        <h2>Q2. ご家族は無事ですか？</h2>
+        <p style="padding-left:1em">
+            <input type="radio" id="ans2_1" name="ans2" value="1" onclick="setSendButtonState()">全員無事<br>
+            <input type="radio" id="ans2_2" name="ans2" value="2" onclick="setSendButtonState()">連絡が取れない家族がいる<br>
+        </p>
+
+        <h2>Q3. 明日の出勤は可能ですか？</h2>
+        <p style="padding-left:1em">
+            <input type="radio" id="ans3_1" name="ans3" value="1" onclick="setSendButtonState()">出勤可能<br>
+            <input type="radio" id="ans3_2" name="ans3" value="2" onclick="setSendButtonState()">出勤はできない<br>
+            <input type="radio" id="ans3_3" name="ans3" value="3" onclick="setSendButtonState()">わからない<br>
+        </p>
+
+        <h2>Q4. 心配事があれば、選択してください(複数選択可)</h2>
+        <p style="padding-left:1em">
+            <input type="checkbox" id="ans4_1" name="ans4" value="1">家が倒壊した<br>
+            <input type="checkbox" id="ans4_2" name="ans4" value="2">ペットが見つからない<br>
+            <input type="checkbox" id="ans4_3" name="ans4" value="4">避難所にいる<br>
+            <input type="checkbox" id="ans4_4" name="ans4" value="8">その他<br>
+        </p>
+
+        <h2>Q5. 会社に伝えたいこと、不安などがあれば、ご記入ください。</h2>
+        <textarea style="resize:none" id="ans5_1" name="ans5" cols="40" rows="8" resize="none"></textarea>
+    </form>
+
+    <br>
+
+    <div style="text-align: center">
+        <input type="button" disabled id="sendSurvey" value="送信" onClick="sendSurvery()"><br>
+    </div>
+
+</body>
+
+</html>
