@@ -60,7 +60,7 @@ async function getEmployeeAnswerDB(json) {
             subObj.title = surveyObj[i][SUB_TITLE_NAME + (j + 1).toString(10)];
             if (resultNo >= 0) {
                 subObj.select = (parseInt(surveyResultObj[i + resultNo].select, 10) >> j) & 1;
-                subObj.text = surveyResultObj[i + resultNo].text.replace("\v", "\n");
+                subObj.text = surveyResultObj[i + resultNo].text.replace(/\v/g, "\n");
             }
             else {
                 subObj.select = 0;
@@ -173,7 +173,7 @@ async function getAnswerDB(json) {
                             break;
                         }
                     }
-                    subObj.text = name + "\n" + surveyResultObj[i + jsonParse.questionId - 1].text.replace("\v", "\n");
+                    subObj.text = name + "\n" + surveyResultObj[i + jsonParse.questionId - 1].text.replace(/\v/g, "\n");
                 }
                 answerObj.sub.push(subObj);
             }
@@ -241,6 +241,7 @@ async function saveCsv(filePath, saveObj) {
     }
     // デバッグ用
     console.log(saveText);
+
     /*
         let blob = new Blob([saveText], { type: "text/plan" });
         const res = await fetch("test.csv", {
