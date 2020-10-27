@@ -11,12 +11,12 @@ const MAX_SUB_QUESTION = 5;
 const SUB_TITLE_NAME = "subTitle";
 const SURVEY_RESULT_KEY_TBL = ["id", "questionId", "select", "text"];
 
-async function getEmployeeAnswerDB(json) {
+exports.getEmployeeAnswerDB = function (json) {
     let jsonParse = JSON.parse(json);
     let answerObj = new Object();
-    let employeeObj = await readCsv(EMPLOYEE_DATA_PATH);
-    let surveyObj = await readCsv(SURVEY_DATA_PATH);
-    let surveyResultObj = await readCsv(SURVEY_RESULT_DATA_PATH);
+    let employeeObj = readCsv(EMPLOYEE_DATA_PATH);
+    let surveyObj = readCsv(SURVEY_DATA_PATH);
+    let surveyResultObj = readCsv(SURVEY_RESULT_DATA_PATH);
     let resultNo = -1;
 
     answerObj.id = "";
@@ -74,10 +74,10 @@ async function getEmployeeAnswerDB(json) {
     return JSON.stringify(answerObj);
 }
 
-async function setEmployeeAnswerDB(json) {
+exports.setEmployeeAnswerDB = function (json) {
     let jsonParse = JSON.parse(json);
-    let surveyObj = await readCsv(SURVEY_DATA_PATH);
-    let surveyResultObj = await readCsv(SURVEY_RESULT_DATA_PATH);
+    let surveyObj = readCsv(SURVEY_DATA_PATH);
+    let surveyResultObj = readCsv(SURVEY_RESULT_DATA_PATH);
     let resultNo = -1;
 
     for (let i = 0; i < surveyResultObj.length; i += surveyObj.length) {
@@ -130,11 +130,11 @@ async function setEmployeeAnswerDB(json) {
     saveCsv(SURVEY_RESULT_DATA_PATH, surveyResultObj);
 }
 
-async function getAnsweredRatedataDB() {
+exports.getAnsweredRatedataDB = function () {
     let answerObj = new Object();
-    let employeeObj = await readCsv(EMPLOYEE_DATA_PATH);
-    let surveyObj = await readCsv(SURVEY_DATA_PATH);
-    let surveyResultObj = await readCsv(SURVEY_RESULT_DATA_PATH);
+    let employeeObj = readCsv(EMPLOYEE_DATA_PATH);
+    let surveyObj = readCsv(SURVEY_DATA_PATH);
+    let surveyResultObj = readCsv(SURVEY_RESULT_DATA_PATH);
 
     answerObj.total = employeeObj.length;
     answerObj.response = surveyResultObj.length / surveyObj.length;
@@ -142,12 +142,12 @@ async function getAnsweredRatedataDB() {
     return JSON.stringify(answerObj);
 }
 
-async function getAnswerDB(json) {
+exports.getAnswerDB = function (json) {
     let jsonParse = JSON.parse(json);
     let answerObj = new Object();
-    let employeeObj = await readCsv(EMPLOYEE_DATA_PATH);
-    let surveyObj = await readCsv(SURVEY_DATA_PATH);
-    let surveyResultObj = await readCsv(SURVEY_RESULT_DATA_PATH);
+    let employeeObj = readCsv(EMPLOYEE_DATA_PATH);
+    let surveyObj = readCsv(SURVEY_DATA_PATH);
+    let surveyResultObj = readCsv(SURVEY_RESULT_DATA_PATH);
     let subQuestionNum = 0;
 
     if (jsonParse.questionId > surveyObj.length) {
@@ -201,13 +201,11 @@ async function getAnswerDB(json) {
     return JSON.stringify(answerObj);
 }
 
-async function readCsv(filePath) {
+function readCsv(filePath) {
+    const fs = require("fs");
     let csvObj = [];
+    let csvText = fs.readFileSync(filePath, "utf8");
 
-    const res = await fetch(filePath);
-    const ab = await res.arrayBuffer();
-    const td = new TextDecoder("Shift_JIS");
-    csvText = td.decode(ab);
     csvText = csvText.replace(/\r?\n/g, "\n");
     let lines = csvText.split("\n");
     let items = lines[0].split(",");
@@ -223,7 +221,8 @@ async function readCsv(filePath) {
     return csvObj;
 }
 
-async function saveCsv(filePath, saveObj) {
+function saveCsv(filePath, saveObj) {
+    const fs = require("fs");
     let saveText = "";
 
     for (let keyName of SURVEY_RESULT_KEY_TBL) {
@@ -239,14 +238,9 @@ async function saveCsv(filePath, saveObj) {
         saveText = saveText.slice(0, -1);
         saveText += "\n";
     }
-    // デバッグ用
-    console.log(saveText);
+    saveText = saveText.slice(0, -1);
 
-    /*
-        let blob = new Blob([saveText], { type: "text/plan" });
-        const res = await fetch("test.csv", {
-            method: "PUT",
-            body: blob
-        });
-    */
+    fs.writeFile(filePath, saveText, (err) => {
+        if (err) throw err;
+    });
 }
