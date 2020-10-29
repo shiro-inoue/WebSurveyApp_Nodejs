@@ -1,3 +1,9 @@
+let QUESTIONTYPE = {
+    radio: 1,
+    check: 2,
+    text: 3
+}
+
 let employeeNumber = "";
 let employeeName = "";
 let answersToDisp = [];
@@ -17,31 +23,55 @@ window.onload = function () {
         employeeNumber = "";
     }
 
-    getDbAnswers().then(result => {
-        if (result) {
-            document.getElementById("employeeName").innerHTML = "";
-            dispEmployeeName();
-            dispEmployeeAnswer();
-        } else {
-            document.getElementById("employeeName").innerHTML = "エラー";
-        }
-    });
+    getDbAnswers();
 }
 
 
-async function getDbAnswers() {
-    let obj = new Object();
-    let json;
-    obj.id = employeeNumber;
-    let jsonStringify = JSON.stringify(obj);
-    json = await getEmployeeAnswerDB(jsonStringify);
-    answerDB = JSON.parse(json);
+function getDbAnswers() {
+    // let obj = new Object();
+    // let json;
+    // obj.id = employeeNumber;
+    // let jsonStringify = JSON.stringify(obj);
+    // json = await getEmployeeAnswerDB(jsonStringify);
 
-    employeeName = answerDB.name;
-    if (employeeName == "") {
-        return false;
+    {
+        var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+        req.onreadystatechange = function () {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+            // console.log("readyState = " + req.readyState + ", status = " + req.status);
+            if (req.readyState == 4 && req.status == 200) { // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+                // console.log("<+><+><+><+><+><+><+><+>\n" + req.responseText);		          // 取得した JSON ファイルの中身を表示
+
+                answerDB = JSON.parse(req.responseText);
+                // console.log(answerDB)
+
+                employeeName = answerDB.name;
+                if (employeeName == "") {
+                    document.getElementById("employeeName").innerHTML = "エラー";
+                    return;
+                }
+                makeAnswersToDisp(answerDB);
+                document.getElementById("employeeName").innerHTML = "";
+                dispEmployeeName();
+                dispEmployeeAnswer();
+            }
+        };
+        req.open("GET", "http://localhost:5501/employeeAnswerDB?employeeId=" + employeeNumber, false);
+        req.send(null);
     }
 
+    // answerDB = JSON.parse(req.responseText);
+    // console.log(answerDB)
+
+    // employeeName = answerDB.name;
+    // if (employeeName == "") {
+    //     return false;
+    // }
+
+    // return true;
+}
+
+
+function makeAnswersToDisp(answerDB){
     let q;
     let ansId;
     let idAndAns;
@@ -67,8 +97,6 @@ async function getDbAnswers() {
             answersToDisp.push(idAndAns);
         }
     }
-
-    return true;
 }
 
 
@@ -156,7 +184,23 @@ function setEmployeeAnswer() {
 
 
     let jsonStringify = JSON.stringify(answerDB);
-    setEmployeeAnswerDB(jsonStringify);
+    // console.log("<<<<< jsonStringify >>>>>\n" + jsonStringify)
+    // setEmployeeAnswerDB(jsonStringify);
+
+    {
+        let req = new XMLHttpRequest();
+        req.open("POST", "http://localhost:5501/employeeAnswerDB");
+        req.setRequestHeader("Content-Type", "application/json");
+        req.onload = () => {
+            console.log(req.status);
+            console.log("success!");
+        };
+        req.onerror = () => {
+            console.log(req.status);
+            console.log("error!");
+        };
+        req.send(jsonStringify);
+    }
 
     return;
 }
@@ -166,7 +210,8 @@ function sendSurvery() {
 
     setEmployeeAnswer();
 
-    alert("送信しました");
+    // alert("送信しました");
+    console.log("送信しました");
 
     return;
 }

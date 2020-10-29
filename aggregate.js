@@ -1,5 +1,12 @@
 let total = 0;
 let response = 0;
+let flag = true;
+
+let QUESTIONTYPE = {
+    radio: 1,
+    check: 2,
+    text: 3
+}
 
 window.onload = function () {
     dispResponseRate();
@@ -7,23 +14,33 @@ window.onload = function () {
     dispAnswer();
 };
 
-async function dispResponseRate() {
+// async function dispResponseRate() {
+function dispResponseRate() {
+    // console.log("dispResponseRate");
     let json;
     let jsonParse;
 
-    json = await getAnsweredRatedataDB();
-    jsonParse = JSON.parse(json);
-    // console.log("jsonParse.total = " + jsonParse.total);
-    // console.log("jsonParse.response = " + jsonParse.response);
+    {
+        var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+        req.onreadystatechange = function () {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+            if (req.readyState == 4 && req.status == 200) { // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+                jsonParse = JSON.parse(req.responseText);
+                // console.log("jsonParse.total = " + jsonParse.total);
+                // console.log("jsonParse.response = " + jsonParse.response);
 
-    let responseRate = 0;
-    total = jsonParse.total;
-    response = jsonParse.response;
-    if (isComputableNumber(response)) {
-        responseRate = calcResponseRate(response);
+                let responseRate = 0;
+                total = jsonParse.total;
+                response = jsonParse.response;
+                if (isComputableNumber(response)) {
+                    responseRate = calcResponseRate(response);
+                }
+                // console.log("responseRate = " + responseRate);
+                document.getElementById('responseRate').innerHTML = formattingHTMLResponseRate(responseRate.toFixed(1));
+            }
+        };
+        req.open("GET", "http://localhost:5501/answeredRatedataDB", false); // HTTPメソッドとアクセスするサーバーの　URL　を指定
+        req.send(null);					    // 実際にサーバーへリクエストを送信
     }
-    // console.log("responseRate = " + responseRate);
-    document.getElementById('responseRate').innerHTML = formattingHTMLResponseRate(responseRate.toFixed(1));
 }
 
 function dispDayTime() {
@@ -43,7 +60,8 @@ function dispDayTime() {
     document.getElementById('dateTime').innerHTML = formattingHTMLDayTime(dayTime);
 }
 
-async function dispAnswer() {
+// async function dispAnswer() {
+function dispAnswer() {
     let obj = new Object();
     let json;
     let jsonParse;
@@ -52,24 +70,35 @@ async function dispAnswer() {
     let html = "";
     let title = "";
 
-    while (true) {
+    while (flag) {
         // console.log("obj.questionId = " + obj.questionId);
         jsonStringify = JSON.stringify(obj);
-        json = await getAnswerDB(jsonStringify);
-        jsonParse = JSON.parse(json);
-        // console.log("Object.keys(jsonParse).length = " + Object.keys(jsonParse).length);
+        // json = await getAnswerDB(jsonStringify);
+        {
+            var req = new XMLHttpRequest();		  // XMLHttpRequest オブジェクトを生成する
+            req.onreadystatechange = function () {		  // XMLHttpRequest オブジェクトの状態が変化した際に呼び出されるイベントハンドラ
+                if (req.readyState == 4 && req.status == 200) { // サーバーからのレスポンスが完了し、かつ、通信が正常に終了した場合
+                    jsonParse = JSON.parse(req.responseText);
 
-        if (jsonParse.title.length == 0) {
-            break;
+                    if (jsonParse.title.length != 0) {
+                        // console.log("jsonParse.title = " + jsonParse.title);
+                        html += "<div>";
+                        title = "Q" + obj.questionId + ". " + jsonParse.title;
+                        html += "<h4>" + title + "</h4>";
+                        html = genAnswerPart(html, jsonParse);
+                        html += "</div><br>";
+
+                        ++obj.questionId;
+                    }
+                    else {
+                        // console.log("***** jsonParse.title.length == 0 *****");
+                        flag = false;
+                    }
+                }
+            };
+            req.open("GET", "http://localhost:5501/answerDB?questionId=" + obj.questionId, false); // HTTPメソッドとアクセスするサーバーの　URL　を指定
+            req.send(null);					    // 実際にサーバーへリクエストを送信
         }
-        // console.log("jsonParse.title = " + jsonParse.title);
-        html += "<div>";
-        title = "Q" + obj.questionId + ". " + jsonParse.title;
-        html += "<h4>" + title + "</h4>";
-        html = genAnswerPart(html, jsonParse);
-        html += "</div><br>";
-
-        ++obj.questionId;
     }
     document.getElementById('answer').innerHTML = html;
 }
