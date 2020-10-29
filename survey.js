@@ -210,8 +210,8 @@ function sendSurvery() {
 
     setEmployeeAnswer();
 
-    // alert("送信しました");
-    console.log("送信しました");
+    alert("送信しました");
+    // console.log("送信しました");
 
     return;
 }
