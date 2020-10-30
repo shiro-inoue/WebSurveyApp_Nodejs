@@ -1,5 +1,14 @@
+let QUESTIONTYPE = {
+    radio: 1,
+    check: 2,
+    text: 3
+}
+
 let total = 0;
 let response = 0;
+
+const GET_ANSWERED_RATEDATA_DB = "http://localhost:5501/answeredRatedataDB"
+const GET_ANSWERED_DB = "http://localhost:5501/answerDB?questionId="
 
 window.onload = function () {
     dispResponseRate();
@@ -8,21 +17,20 @@ window.onload = function () {
 };
 
 async function dispResponseRate() {
-    let json;
+    let res;
     let jsonParse;
+    let responseRate = 0;
 
-    json = await getAnsweredRatedataDB();
-    jsonParse = JSON.parse(json);
+    res = await fetch(GET_ANSWERED_RATEDATA_DB);
+    jsonParse = await res.json();
     // console.log("jsonParse.total = " + jsonParse.total);
     // console.log("jsonParse.response = " + jsonParse.response);
 
-    let responseRate = 0;
     total = jsonParse.total;
     response = jsonParse.response;
     if (isComputableNumber(response)) {
         responseRate = calcResponseRate(response);
     }
-    // console.log("responseRate = " + responseRate);
     document.getElementById('responseRate').innerHTML = formattingHTMLResponseRate(responseRate.toFixed(1));
 }
 
@@ -45,7 +53,7 @@ function dispDayTime() {
 
 async function dispAnswer() {
     let obj = new Object();
-    let json;
+    let res;
     let jsonParse;
     obj.questionId = 1;
 
@@ -54,10 +62,8 @@ async function dispAnswer() {
 
     while (true) {
         // console.log("obj.questionId = " + obj.questionId);
-        jsonStringify = JSON.stringify(obj);
-        json = await getAnswerDB(jsonStringify);
-        jsonParse = JSON.parse(json);
-        // console.log("Object.keys(jsonParse).length = " + Object.keys(jsonParse).length);
+        res = await fetch(GET_ANSWERED_DB + obj.questionId);
+        jsonParse = await res.json();
 
         if (jsonParse.title.length == 0) {
             break;
