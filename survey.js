@@ -144,8 +144,6 @@ function setSendButtonState() {
 
 
 function setEmployeeAnswer() {
-    let res;
-
     answerDB.question[0].sub[0].select = Number(document.getElementById("ans1_1").checked);
     answerDB.question[0].sub[1].select = Number(document.getElementById("ans1_2").checked);
 
