@@ -1,9 +1,17 @@
+let QUESTIONTYPE = {
+    radio: 1,
+    check: 2,
+    text: 3
+}
+
 let employeeNumber = "";
 let employeeName = "";
 let answersToDisp = [];
 
 let answerDB;
 
+const GET_EMPLOYEE_ANSWER_DB = "http://localhost:5501/employeeAnswerDB?employeeId="
+const SET_EMPLOYEE_ANSWER_DB = "http://localhost:5501/employeeAnswerDB"
 
 window.onload = function () {
     let urlParam = location.search.substring(1).split('=');
@@ -31,11 +39,10 @@ window.onload = function () {
 
 async function getDbAnswers() {
     let obj = new Object();
-    let json;
-    obj.id = employeeNumber;
-    let jsonStringify = JSON.stringify(obj);
-    json = await getEmployeeAnswerDB(jsonStringify);
-    answerDB = JSON.parse(json);
+    let res;
+
+    res = await fetch(GET_EMPLOYEE_ANSWER_DB + employeeNumber);
+    answerDB = await res.json();
 
     employeeName = answerDB.name;
     if (employeeName == "") {
@@ -154,9 +161,13 @@ function setEmployeeAnswer() {
 
     answerDB.question[4].sub[0].text = document.getElementById("ans5_1").value;
 
-
-    let jsonStringify = JSON.stringify(answerDB);
-    setEmployeeAnswerDB(jsonStringify);
+    fetch(SET_EMPLOYEE_ANSWER_DB, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(answerDB)
+    });
 
     return;
 }
